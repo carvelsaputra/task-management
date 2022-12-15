@@ -8,31 +8,31 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CraeteTaskDto } from './dto/create-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { getTaskFilterDto } from './dto/get-task-filter.dto';
 import { updateTaskStatus } from './dto/update-task-status.dto';
-import { Task } from './tasks.model';
+import { Task } from './task-entity';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
-  @Get()
-  getTasks(@Query() filterDto: getTaskFilterDto): Task[] {
-    /**
-     * if we have any filters defined, call tasks.Service.getTasksWithFilters
-     * otherwise, just get all Tasks
-     */
+  // @Get()
+  // getTasks(@Query() filterDto: getTaskFilterDto): Task[] {
+  //   /**
+  //    * if we have any filters defined, call tasks.Service.getTasksWithFilters
+  //    * otherwise, just get all Tasks
+  //    */
 
-    if (Object.keys(filterDto).length) {
-      return this.tasksService.getTasksWithFilters(filterDto);
-    } else {
-      return this.tasksService.getAllTasks();
-    }
-  }
+  //   if (Object.keys(filterDto).length) {
+  //     return this.tasksService.getTasksWithFilters(filterDto);
+  //   } else {
+  //     return this.tasksService.getAllTasks();
+  //   }
+  // }
 
   @Get('/:id')
-  getTaskById(@Param('id') id: string): Task {
+  getTaskById(@Param('id') id: string): Promise<Task> {
     return this.tasksService.getTaskById(id);
   }
 
@@ -40,13 +40,13 @@ export class TasksController {
   createTask(
     // @Body('title') title: string,
     // @Body('description') description: string,
-    @Body() createTaskDto: CraeteTaskDto,
-  ): Task {
+    @Body() createTaskDto: CreateTaskDto,
+  ): Promise<Task> {
     return this.tasksService.createTask(createTaskDto);
   }
 
   @Delete('/:id')
-  deleteTask(@Param('id') id: string): void {
+  deleteTask(@Param('id') id: string): Promise<void> {
     return this.tasksService.deleteTask(id);
   }
 
@@ -54,7 +54,7 @@ export class TasksController {
   updateTaskStatus(
     @Param('id') id: string,
     @Body() updateTaskStatus: updateTaskStatus,
-  ): Task {
+  ): Promise<Task> {
     const { status } = updateTaskStatus;
     return this.tasksService.updateTaskStatus(id, status);
   }
