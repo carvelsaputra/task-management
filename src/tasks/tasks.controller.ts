@@ -17,19 +17,15 @@ import { TasksService } from './tasks.service';
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
-  // @Get()
-  // getTasks(@Query() filterDto: getTaskFilterDto): Task[] {
-  //   /**
-  //    * if we have any filters defined, call tasks.Service.getTasksWithFilters
-  //    * otherwise, just get all Tasks
-  //    */
+  @Get()
+  getTasks(@Query() filterDto: getTaskFilterDto): Promise<Task[]> {
+    /**
+     * if we have any filters defined, call tasks.Service.getTasksWithFilters
+     * otherwise, just get all Tasks
+     */
 
-  //   if (Object.keys(filterDto).length) {
-  //     return this.tasksService.getTasksWithFilters(filterDto);
-  //   } else {
-  //     return this.tasksService.getAllTasks();
-  //   }
-  // }
+    return this.tasksService.getTask(filterDto);
+  }
 
   @Get('/:id')
   getTaskById(@Param('id') id: string): Promise<Task> {

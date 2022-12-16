@@ -5,46 +5,29 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task-entity';
 import { Repository } from 'typeorm';
+import { getTaskFilterDto } from './dto/get-task-filter.dto';
 @Injectable()
 export class TasksService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
   ) {}
-  // getAllTasks(): Task[] {
-  //   return this.tasks;
-  // }
-  // getTasksWithFilters(filterDto: getTaskFilterDto): Task[] {
-  //   const { status, search } = filterDto;
-  //   //define a temporary array to hold the result
-  //   let tasks = this.getAllTasks();
-  //   // do something with status
-  //   if (status) {
-  //     tasks = tasks.filter((task) => task.status === status);
-  //   }
-  //   //do something with search
-  //   if (search) {
-  //     tasks = tasks.filter((task) => {
-  //       if (task.title.includes(search) || task.description.includes(search)) {
-  //         return true;
-  //       }
-  //       return false;
-  //     });
-  //   }
-  //   return tasks;
-  // }
-  // createTask(createTaskDto: CraeteTaskDto): Task {
-  //   const { title, description } = createTaskDto;
-  //   const task: Task = {
-  //     id: uuid(),
-  //     title,
-  //     description,
-  //     status: TaskStatus.OPEN,
-  //   };
-  //   this.tasks.push(task);
-  //   return task;
-  // }
-
+  async getTask(filterDto: getTaskFilterDto): Promise<Task[]> {
+    const { status, search } = filterDto;
+    const query = await this.taskRepository.createQueryBuilder('task');
+    if (status) {
+      // :status could be anything, we defined the query, and we mapping those value inside curly bracket
+      query.andWhere('task.status = :status', { status });
+    }
+    if (search) {
+      query.andWhere(
+        'LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search)',
+        { search: `%${search}%` },
+      );
+    }
+    const task = query.getMany();
+    return task;
+  }
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const { title, description } = createTaskDto;
     const task = this.taskRepository.create({
