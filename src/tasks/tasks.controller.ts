@@ -10,6 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { getUser } from 'src/auth/get-user.decorator';
+import { User } from 'src/auth/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { getTaskFilterDto } from './dto/get-task-filter.dto';
 import { updateTaskStatus } from './dto/update-task-status.dto';
@@ -21,13 +23,16 @@ import { TasksService } from './tasks.service';
 export class TasksController {
   constructor(private tasksService: TasksService) {}
   @Get()
-  getTasks(@Query() filterDto: getTaskFilterDto): Promise<Task[]> {
+  getTasks(
+    @Query() filterDto: getTaskFilterDto,
+    @getUser() user: User,
+  ): Promise<Task[]> {
     /**
      * if we have any filters defined, call tasks.Service.getTasksWithFilters
      * otherwise, just get all Tasks
      */
 
-    return this.tasksService.getTask(filterDto);
+    return this.tasksService.getTask(filterDto, user);
   }
 
   @Get('/:id')
@@ -40,8 +45,9 @@ export class TasksController {
     // @Body('title') title: string,
     // @Body('description') description: string,
     @Body() createTaskDto: CreateTaskDto,
+    @getUser() user: User,
   ): Promise<Task> {
-    return this.tasksService.createTask(createTaskDto);
+    return this.tasksService.createTask(createTaskDto, user);
   }
 
   @Delete('/:id')
